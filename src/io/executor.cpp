@@ -26,6 +26,7 @@ limitations under the License. */
 #include "framework/program/var_desc.h"
 #include "framework/scope.h"
 #include "framework/tensor.h"
+#include "operators/conv_op.h"
 #include "operators/math/gemm.h"
 
 namespace paddle_mobile {
@@ -282,7 +283,15 @@ std::shared_ptr<framework::Tensor> Executor<Dtype, P>::Predict(
   for (int i = 0; i < profile.size(); i++) {
     const auto &pInfo = profile[i];
     uint64_t timeCost = pInfo.runEnd - pInfo.runBegin;
-    _tp[ops[i]->Type()] += timeCost;
+    if (ops[i]->Type() == "conv2d") {
+      auto inputs = ops[i]->Inputs();
+      auto *filter = framework::GetVarValue<framework::LoDTensor>(
+          "Filter", inputs, *(program_.scope));
+      int kernel_size = filter->dims()[2];
+      _tp[ops[i]->Type() + "_" + std::to_string(kernel_size)] += timeCost;
+    } else {
+      _tp[ops[i]->Type()] += timeCost;
+    }
   }
   printf("====================[ profile ]======================\n");
   using prof_t = std::pair<std::string, uint64_t>;
@@ -352,6 +361,14 @@ std::shared_ptr<framework::LoDTensor> Executor<Dtype, P>::PredictLod(
   for (int i = 0; i < profile.size(); i++) {
     const auto &pInfo = profile[i];
     uint64_t timeCost = pInfo.runEnd - pInfo.runBegin;
+    if (ops[i]->Type() == "conv2d") {
+      auto inputs = ops[i]->Inputs();
+      auto input_keys = ops[i]->GetInputKeys();
+      auto *filter = framework::GetVarValue<framework::LoDTensor>(
+          input_keys[1], inputs, *(program_.scope));
+      int kernel_size = filter->dims()[2];
+      printf("kernel size: %d\n", kernel_size);
+    }
     _tp[ops[i]->Type()] += timeCost;
   }
   printf("====================[ profile ]======================\n");

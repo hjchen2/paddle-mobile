@@ -26,7 +26,7 @@ int main() {
 #endif
 
   paddle_mobile.SetThreadNum(1);
-  bool optimize = false;
+  bool optimize = true;
   auto time1 = time();
   if (paddle_mobile.Load(g_googlenet, optimize)) {
     auto time2 = time();
