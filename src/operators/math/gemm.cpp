@@ -43,30 +43,31 @@ void Gemm::PackMatrixA_4r(int m, int k, int m_tail, const float *A, int lda,
       *buffer++ = *a3++;
     }
   }
-
-  if (m_tail != 0) {
-    a0 = &A(m - m_tail, 0);
-    a1 = a0 + lda;
-    a2 = a0 + 2 * lda;
-    a3 = a0 + 3 * lda;
-    switch (m_tail) {
-      case 1:
-        a1 = zero;
-      case 2:
-        a2 = zero;
-      case 3:
-        a3 = zero;
-        break;
-      default:
-        break;
+  /*
+    if (m_tail != 0) {
+      a0 = &A(m - m_tail, 0);
+      a1 = a0 + lda;
+      a2 = a0 + 2 * lda;
+      a3 = a0 + 3 * lda;
+      switch (m_tail) {
+        case 1:
+          a1 = zero;
+        case 2:
+          a2 = zero;
+        case 3:
+          a3 = zero;
+          break;
+        default:
+          break;
+      }
+      for (int j = 0; j < k; ++j) {
+        *buffer++ = *a0++;
+        *buffer++ = *a1++;
+        *buffer++ = *a2++;
+        *buffer++ = *a3++;
+      }
     }
-    for (int j = 0; j < k; ++j) {
-      *buffer++ = *a0++;
-      *buffer++ = *a1++;
-      *buffer++ = *a2++;
-      *buffer++ = *a3++;
-    }
-  }
+  */
 }
 
 void Gemm::PackMatrixA_6r(int m, int k, int m_tail, const float *A, int lda,
@@ -89,38 +90,40 @@ void Gemm::PackMatrixA_6r(int m, int k, int m_tail, const float *A, int lda,
       *local_buffer++ = *a5++;
     }
   }
-  if (m_tail != 0) {
-    const float *a0 = &A(i_length, 0);
-    const float *a1 = a0 + lda;
-    const float *a2 = a0 + 2 * lda;
-    const float *a3 = a0 + 3 * lda;
-    const float *a4 = a0 + 4 * lda;
-    const float *a5 = a0 + 5 * lda;
-    float *local_buffer = buffer + i_length * k;
-    switch (m_tail) {
-      case 1:
-        a1 = zero;
-      case 2:
-        a2 = zero;
-      case 3:
-        a3 = zero;
-      case 4:
-        a4 = zero;
-      case 5:
-        a5 = zero;
-        break;
-      default:
-        break;
+  /*
+    if (m_tail != 0) {
+      const float *a0 = &A(i_length, 0);
+      const float *a1 = a0 + lda;
+      const float *a2 = a0 + 2 * lda;
+      const float *a3 = a0 + 3 * lda;
+      const float *a4 = a0 + 4 * lda;
+      const float *a5 = a0 + 5 * lda;
+      float *local_buffer = buffer + i_length * k;
+      switch (m_tail) {
+        case 1:
+          a1 = zero;
+        case 2:
+          a2 = zero;
+        case 3:
+          a3 = zero;
+        case 4:
+          a4 = zero;
+        case 5:
+          a5 = zero;
+          break;
+        default:
+          break;
+      }
+      for (int j = 0; j < k; ++j) {
+        *local_buffer++ = *a0++;
+        *local_buffer++ = *a1++;
+        *local_buffer++ = *a2++;
+        *local_buffer++ = *a3++;
+        *local_buffer++ = *a4++;
+        *local_buffer++ = *a5++;
+      }
     }
-    for (int j = 0; j < k; ++j) {
-      *local_buffer++ = *a0++;
-      *local_buffer++ = *a1++;
-      *local_buffer++ = *a2++;
-      *local_buffer++ = *a3++;
-      *local_buffer++ = *a4++;
-      *local_buffer++ = *a5++;
-    }
-  }
+  */
 }
 
 void Gemm::PackMatrixA_omp_6r(int m, int k, int m_tail, const float *A, int lda,
@@ -144,38 +147,40 @@ void Gemm::PackMatrixA_omp_6r(int m, int k, int m_tail, const float *A, int lda,
       *local_buffer++ = *a5++;
     }
   }
-  if (m_tail != 0) {
-    const float *a0 = &A(i_length, 0);
-    const float *a1 = a0 + lda;
-    const float *a2 = a0 + 2 * lda;
-    const float *a3 = a0 + 3 * lda;
-    const float *a4 = a0 + 4 * lda;
-    const float *a5 = a0 + 5 * lda;
-    float *local_buffer = buffer + i_length * k;
-    switch (m_tail) {
-      case 1:
-        a1 = zero;
-      case 2:
-        a2 = zero;
-      case 3:
-        a3 = zero;
-      case 4:
-        a4 = zero;
-      case 5:
-        a5 = zero;
-        break;
-      default:
-        break;
+  /*
+    if (m_tail != 0) {
+      const float *a0 = &A(i_length, 0);
+      const float *a1 = a0 + lda;
+      const float *a2 = a0 + 2 * lda;
+      const float *a3 = a0 + 3 * lda;
+      const float *a4 = a0 + 4 * lda;
+      const float *a5 = a0 + 5 * lda;
+      float *local_buffer = buffer + i_length * k;
+      switch (m_tail) {
+        case 1:
+          a1 = zero;
+        case 2:
+          a2 = zero;
+        case 3:
+          a3 = zero;
+        case 4:
+          a4 = zero;
+        case 5:
+          a5 = zero;
+          break;
+        default:
+          break;
+      }
+      for (int j = 0; j < k; ++j) {
+        *local_buffer++ = *a0++;
+        *local_buffer++ = *a1++;
+        *local_buffer++ = *a2++;
+        *local_buffer++ = *a3++;
+        *local_buffer++ = *a4++;
+        *local_buffer++ = *a5++;
+      }
     }
-    for (int j = 0; j < k; ++j) {
-      *local_buffer++ = *a0++;
-      *local_buffer++ = *a1++;
-      *local_buffer++ = *a2++;
-      *local_buffer++ = *a3++;
-      *local_buffer++ = *a4++;
-      *local_buffer++ = *a5++;
-    }
-  }
+  */
 }
 
 void Gemm::PackMatrixA_8r(int m, int k, int m_tail, const float *A, int lda,
@@ -202,46 +207,48 @@ void Gemm::PackMatrixA_8r(int m, int k, int m_tail, const float *A, int lda,
       *local_buffer++ = *a7++;
     }
   }
-  if (m_tail != 0) {
-    const float *a0 = &A(i_length, 0);
-    const float *a1 = a0 + lda;
-    const float *a2 = a0 + 2 * lda;
-    const float *a3 = a0 + 3 * lda;
-    const float *a4 = a0 + 4 * lda;
-    const float *a5 = a0 + 5 * lda;
-    const float *a6 = a0 + 6 * lda;
-    const float *a7 = a0 + 7 * lda;
-    float *local_buffer = buffer + i_length * k;
-    switch (m_tail) {
-      case 1:
-        a1 = zero;
-      case 2:
-        a2 = zero;
-      case 3:
-        a3 = zero;
-      case 4:
-        a4 = zero;
-      case 5:
-        a5 = zero;
-      case 6:
-        a6 = zero;
-      case 7:
-        a7 = zero;
-        break;
-      default:
-        break;
+  /*
+    if (m_tail != 0) {
+      const float *a0 = &A(i_length, 0);
+      const float *a1 = a0 + lda;
+      const float *a2 = a0 + 2 * lda;
+      const float *a3 = a0 + 3 * lda;
+      const float *a4 = a0 + 4 * lda;
+      const float *a5 = a0 + 5 * lda;
+      const float *a6 = a0 + 6 * lda;
+      const float *a7 = a0 + 7 * lda;
+      float *local_buffer = buffer + i_length * k;
+      switch (m_tail) {
+        case 1:
+          a1 = zero;
+        case 2:
+          a2 = zero;
+        case 3:
+          a3 = zero;
+        case 4:
+          a4 = zero;
+        case 5:
+          a5 = zero;
+        case 6:
+          a6 = zero;
+        case 7:
+          a7 = zero;
+          break;
+        default:
+          break;
+      }
+      for (int j = 0; j < k; ++j) {
+        *local_buffer++ = *a0++;
+        *local_buffer++ = *a1++;
+        *local_buffer++ = *a2++;
+        *local_buffer++ = *a3++;
+        *local_buffer++ = *a4++;
+        *local_buffer++ = *a5++;
+        *local_buffer++ = *a6++;
+        *local_buffer++ = *a7++;
+      }
     }
-    for (int j = 0; j < k; ++j) {
-      *local_buffer++ = *a0++;
-      *local_buffer++ = *a1++;
-      *local_buffer++ = *a2++;
-      *local_buffer++ = *a3++;
-      *local_buffer++ = *a4++;
-      *local_buffer++ = *a5++;
-      *local_buffer++ = *a6++;
-      *local_buffer++ = *a7++;
-    }
-  }
+  */
 }
 
 void Gemm::PackMatrixA_omp_8r(int m, int k, int m_tail, const float *A, int lda,
@@ -269,46 +276,48 @@ void Gemm::PackMatrixA_omp_8r(int m, int k, int m_tail, const float *A, int lda,
       *local_buffer++ = *a7++;
     }
   }
-  if (m_tail != 0) {
-    const float *a0 = &A(i_length, 0);
-    const float *a1 = a0 + lda;
-    const float *a2 = a0 + 2 * lda;
-    const float *a3 = a0 + 3 * lda;
-    const float *a4 = a0 + 4 * lda;
-    const float *a5 = a0 + 5 * lda;
-    const float *a6 = a0 + 6 * lda;
-    const float *a7 = a0 + 7 * lda;
-    float *local_buffer = buffer + i_length * k;
-    switch (m_tail) {
-      case 1:
-        a1 = zero;
-      case 2:
-        a2 = zero;
-      case 3:
-        a3 = zero;
-      case 4:
-        a4 = zero;
-      case 5:
-        a5 = zero;
-      case 6:
-        a6 = zero;
-      case 7:
-        a7 = zero;
-        break;
-      default:
-        break;
+  /*
+    if (m_tail != 0) {
+      const float *a0 = &A(i_length, 0);
+      const float *a1 = a0 + lda;
+      const float *a2 = a0 + 2 * lda;
+      const float *a3 = a0 + 3 * lda;
+      const float *a4 = a0 + 4 * lda;
+      const float *a5 = a0 + 5 * lda;
+      const float *a6 = a0 + 6 * lda;
+      const float *a7 = a0 + 7 * lda;
+      float *local_buffer = buffer + i_length * k;
+      switch (m_tail) {
+        case 1:
+          a1 = zero;
+        case 2:
+          a2 = zero;
+        case 3:
+          a3 = zero;
+        case 4:
+          a4 = zero;
+        case 5:
+          a5 = zero;
+        case 6:
+          a6 = zero;
+        case 7:
+          a7 = zero;
+          break;
+        default:
+          break;
+      }
+      for (int j = 0; j < k; ++j) {
+        *local_buffer++ = *a0++;
+        *local_buffer++ = *a1++;
+        *local_buffer++ = *a2++;
+        *local_buffer++ = *a3++;
+        *local_buffer++ = *a4++;
+        *local_buffer++ = *a5++;
+        *local_buffer++ = *a6++;
+        *local_buffer++ = *a7++;
+      }
     }
-    for (int j = 0; j < k; ++j) {
-      *local_buffer++ = *a0++;
-      *local_buffer++ = *a1++;
-      *local_buffer++ = *a2++;
-      *local_buffer++ = *a3++;
-      *local_buffer++ = *a4++;
-      *local_buffer++ = *a5++;
-      *local_buffer++ = *a6++;
-      *local_buffer++ = *a7++;
-    }
-  }
+  */
 }
 
 // 将B矩阵分块复制到连续内存(RowMajor)
@@ -2961,8 +2970,6 @@ void Gemm::Sgemm(int m, int n, int k, float alpha, const float *A, int lda,
       paddle_mobile::memory::Alloc(sizeof(float) * KC * NC));
   packedC = static_cast<float *>(
       paddle_mobile::memory::Alloc(sizeof(float) * MC * NC));
-  zero = static_cast<float *>(paddle_mobile::memory::Alloc(sizeof(float) * KC));
-  memset(static_cast<void *>(zero), 0, sizeof(float) * KC);
 
   int mc, nc;
   for (int j = 0; j < n; j += NC) {
@@ -2994,7 +3001,6 @@ void Gemm::Sgemm(int m, int n, int k, float alpha, const float *A, int lda,
   paddle_mobile::memory::Free(packedA);
   paddle_mobile::memory::Free(packedB);
   paddle_mobile::memory::Free(packedC);
-  paddle_mobile::memory::Free(zero);
 }
 
 void Gemm::SgemmWithBn(int m, int n, int k, float alpha, const float *A,
@@ -3034,8 +3040,6 @@ void Gemm::SgemmWithBn(int m, int n, int k, float alpha, const float *A,
       paddle_mobile::memory::Alloc(sizeof(float) * KC * NC));
   packedC = static_cast<float *>(
       paddle_mobile::memory::Alloc(sizeof(float) * MC * NC));
-  zero = static_cast<float *>(paddle_mobile::memory::Alloc(sizeof(float) * KC));
-  memset(static_cast<void *>(zero), 0, sizeof(float) * KC);
 
   int mc, nc;
   for (int j = 0; j < n; j += NC) {
@@ -3068,7 +3072,6 @@ void Gemm::SgemmWithBn(int m, int n, int k, float alpha, const float *A,
   paddle_mobile::memory::Free(packedA);
   paddle_mobile::memory::Free(packedB);
   paddle_mobile::memory::Free(packedC);
-  paddle_mobile::memory::Free(zero);
 }
 
 void Gemm::SgemmWithPRelu(int m, int n, int k, const float *A, int lda,
@@ -3107,11 +3110,6 @@ void Gemm::SgemmWithPRelu(int m, int n, int k, const float *A, int lda,
       paddle_mobile::memory::Alloc(sizeof(float) * KC * NC));
   packedC = static_cast<float *>(
       paddle_mobile::memory::Alloc(sizeof(float) * MC * NC));
-  zero = static_cast<float *>(paddle_mobile::memory::Alloc(sizeof(float) * KC));
-
-  for (int l = 0; l < KC; ++l) {
-    zero[l] = 0;
-  }
 
   int mc, nc;
   for (int j = 0; j < n; j += NC) {
@@ -3143,7 +3141,6 @@ void Gemm::SgemmWithPRelu(int m, int n, int k, const float *A, int lda,
   paddle_mobile::memory::Free(packedA);
   paddle_mobile::memory::Free(packedB);
   paddle_mobile::memory::Free(packedC);
-  paddle_mobile::memory::Free(zero);
 }
 
 // 32位 float 矩阵乘法
@@ -3165,8 +3162,6 @@ void Gemm::Sgemm_omp(int m, int n, int k, float alpha, const float *A, int lda,
   int L = (max_threads > 2) ? 64 : 32;
   int L1 = L / max_threads * 1024;
   KC = k;
-  zero = static_cast<float *>(paddle_mobile::memory::Alloc(sizeof(float) * KC));
-  memset(static_cast<void *>(zero), 0, sizeof(float) * KC);
   if (m > n) {
     // 对 A 分块
     MC = L1 / (KC * sizeof(float));
@@ -3192,7 +3187,7 @@ void Gemm::Sgemm_omp(int m, int n, int k, float alpha, const float *A, int lda,
 
     packedB = static_cast<float *>(
         paddle_mobile::memory::Alloc(sizeof(float) * KC * NC));
-    (*this.*procPackB)(KC, n, n % NR, B, ldb, packedB);
+    //    (*this.*procPackB)(KC, n, n % NR, B, ldb, packedB);
     packedA = static_cast<float *>(
         paddle_mobile::memory::Alloc(sizeof(float) * MC * KC * max_threads));
   } else {
@@ -3221,7 +3216,7 @@ void Gemm::Sgemm_omp(int m, int n, int k, float alpha, const float *A, int lda,
 
     packedA = static_cast<float *>(
         paddle_mobile::memory::Alloc(sizeof(float) * MC * KC));
-    (*this.*procPackA)(m, KC, m % MR, A, lda, packedA);
+    //    (*this.*procPackA)(m, KC, m % MR, A, lda, packedA);
     packedB = static_cast<float *>(
         paddle_mobile::memory::Alloc(sizeof(float) * KC * NC * max_threads));
   }
@@ -3241,7 +3236,7 @@ void Gemm::Sgemm_omp(int m, int n, int k, float alpha, const float *A, int lda,
       mc = s_min(m - i, MC);
       float *local_A = packedA + MC * KC * local_threads;
       float *local_C = packedC + MC * NC * local_threads;
-      (*this.*procPackA)(mc, KC, mc % MR, &A(i, 0), lda, local_A);
+      //      (*this.*procPackA)(mc, KC, mc % MR, &A(i, 0), lda, local_A);
       if (bias == nullptr) {
         InnerKernelWithBias(mc, n, alpha, local_A, packedB, beta, local_C,
                             &C(i, 0), ldc, relu, nullptr);
@@ -3263,7 +3258,7 @@ void Gemm::Sgemm_omp(int m, int n, int k, float alpha, const float *A, int lda,
       nc = s_min(n - j, NC);
       float *local_B = packedB + KC * NC * local_threads;
       float *local_C = packedC + MC * NC * local_threads;
-      (*this.*procPackB)(KC, nc, nc % NR, &B(0, j), ldb, local_B);
+      //      (*this.*procPackB)(KC, nc, nc % NR, &B(0, j), ldb, local_B);
       InnerKernelWithBias(m, nc, alpha, packedA, local_B, beta, local_C,
                           &C(0, j), ldc, relu, bias);
     }
@@ -3272,7 +3267,6 @@ void Gemm::Sgemm_omp(int m, int n, int k, float alpha, const float *A, int lda,
   paddle_mobile::memory::Free(packedA);
   paddle_mobile::memory::Free(packedB);
   paddle_mobile::memory::Free(packedC);
-  paddle_mobile::memory::Free(zero);
 }
 
 void Gemm::SgemmWithBn_omp(int m, int n, int k, float alpha, const float *A,
@@ -3287,8 +3281,6 @@ void Gemm::SgemmWithBn_omp(int m, int n, int k, float alpha, const float *A,
 
   int L1 = 64 / max_threads * 1024;
   KC = k;
-  zero = static_cast<float *>(paddle_mobile::memory::Alloc(sizeof(float) * KC));
-  memset(static_cast<void *>(zero), 0, sizeof(float) * KC);
   if (m > n) {
     // 对 A 分块
     MC = L1 / (KC * sizeof(float));
@@ -3400,7 +3392,6 @@ void Gemm::SgemmWithBn_omp(int m, int n, int k, float alpha, const float *A,
   paddle_mobile::memory::Free(packedA);
   paddle_mobile::memory::Free(packedB);
   paddle_mobile::memory::Free(packedC);
-  paddle_mobile::memory::Free(zero);
 }
 
 void Gemm::SgemmWithPRelu_omp(int m, int n, int k, const float *A, int lda,
@@ -3415,8 +3406,6 @@ void Gemm::SgemmWithPRelu_omp(int m, int n, int k, const float *A, int lda,
 
   int L1 = 8 * 1024;
   KC = k;
-  zero = static_cast<float *>(paddle_mobile::memory::Alloc(sizeof(float) * KC));
-  memset(static_cast<void *>(zero), 0, sizeof(float) * KC);
   if (m > n) {
     // 对 A 分块
     MC = L1 / (KC * sizeof(float));
@@ -3526,7 +3515,6 @@ void Gemm::SgemmWithPRelu_omp(int m, int n, int k, const float *A, int lda,
   paddle_mobile::memory::Free(packedA);
   paddle_mobile::memory::Free(packedB);
   paddle_mobile::memory::Free(packedC);
-  paddle_mobile::memory::Free(zero);
 }
 
 void Gemm::AddDot6x8(int k, const float *a, const float *b, float *c, int ldc) {

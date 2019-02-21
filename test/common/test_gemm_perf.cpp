@@ -16,149 +16,59 @@ limitations under the License. */
 #include "../test_helper.h"
 #include "../test_include.h"
 #include "operators/math/gemm.h"
+#include "operators/math/gemm/cblas.h"
 #include "operators/math/math_function.h"
 
-#define a(i, j) a[(i)*lda + (j)]
-#define b(i, j) b[(i)*ldb + (j)]
-#define c1(i, j) c1[(i)*ldc + (j)]
-
-#define m 1024
-#define n 1024
-#define k 1024
-
-int main() {
-  paddle_mobile::PaddleMobile<paddle_mobile::CPU> paddle_mobile;
-  paddle_mobile.SetThreadNum(4);
+template <typename Itype, typename Otype>
+void GemmPerf(int M, int N, int K, bool transA, bool transB) {
   Tensor aa, bb, cc;
-  auto aaptr = aa.mutable_data<float>({m, k});
-  auto bbptr = bb.mutable_data<float>({k, n});
-  auto ccptr = cc.mutable_data<float>({m, n});
+  auto *aaptr = aa.mutable_data<Itype>({M, K});
+  auto *bbptr = bb.mutable_data<Itype>({K, N});
+  auto *ccptr = cc.mutable_data<Otype>({M, N});
 
-  for (int i = 0; i < m * k; ++i) {
-    aaptr[i] = 2;
-  }
-  for (int i = 0; i < k * n; ++i) {
-    bbptr[i] = 2;
-  }
-  for (int i = 0; i < m * n; ++i) {
-    ccptr[i] = 2;
-  }
-
-  Tensor aa_int8, bb_int8, cc_int32, cc_int8;
-  auto aaptr_int8 = aa_int8.mutable_data<int8_t>({m, k});
-  auto bbptr_int8 = bb_int8.mutable_data<int8_t>({k, n});
-  auto ccptr_int32 = cc_int32.mutable_data<int32_t>({m, n});
-  auto ccptr_int8 = cc_int8.mutable_data<int8_t>({m, n});
-  int32_t* bias_data_col = new int32_t[m];
-  int32_t* bias_data_row = new int32_t[n];
-
-  for (int i = 0; i < m * k; ++i) {
-    aaptr_int8[i] = static_cast<int8_t>(2);
-  }
-  for (int i = 0; i < k * n; ++i) {
-    bbptr_int8[i] = static_cast<int8_t>(2);
-  }
-  for (int i = 0; i < m * n; ++i) {
-    ccptr_int32[i] = static_cast<int32_t>(2);
-  }
-
-  for (int i = 0; i < m; ++i) {
-    bias_data_col[i] = 2;
-  }
-
-  for (int i = 0; i < n; ++i) {
-    bias_data_row[i] = 2;
-  }
-
-  // float
   // warm-up 10 times
   for (int j = 0; j < 10; ++j) {
-    paddle_mobile::operators::math::MatMul<float, float>(
+    paddle_mobile::operators::math::MatMul<Itype, Otype>(
         aa, false, bb, false, static_cast<float>(1), &cc, static_cast<float>(0),
         false, nullptr);
   }
 
   auto time_start0 = time();
   for (int j = 0; j < 10; ++j) {
-    paddle_mobile::operators::math::MatMul<float, float>(
+    paddle_mobile::operators::math::MatMul<Itype, Otype>(
         aa, false, bb, false, static_cast<float>(1), &cc, static_cast<float>(0),
         false, nullptr);
   }
   auto time_end0 = time();
-  std::cout << "float gemm  cost :" << time_diff(time_start0, time_end0) / 10
+  std::cout << "gemm cost: " << time_diff(time_start0, time_end0) / 10
             << "ms\n";
 
-  // int8_t without bias
-  // warm-up 10 times
+  time_start0 = time();
   for (int j = 0; j < 10; ++j) {
-    paddle_mobile::operators::math::MatMul<int8_t, int32_t>(
-        aa_int8, false, bb_int8, false, static_cast<float>(1), &cc_int32,
-        static_cast<float>(0));
+    paddle_mobile::operators::math::cblas_sgemm(
+        false, false, M, N, K, 1.f, aaptr, K, bbptr, N, 0.f, ccptr, K);
   }
-
-  auto time_start1 = time();
-  for (int j = 0; j < 10; ++j) {
-    paddle_mobile::operators::math::MatMul<int8_t, int32_t>(
-        aa_int8, false, bb_int8, false, static_cast<float>(1), &cc_int32,
-        static_cast<float>(0));
-  }
-  auto time_end1 = time();
-  std::cout << "int8_t gemm  cost :" << time_diff(time_start1, time_end1) / 10
+  time_end0 = time();
+  std::cout << "gemm cost: " << time_diff(time_start0, time_end0) / 10
             << "ms\n";
+}
 
-  // int8_t with bias, column element wise add
-  // warm-up 10 times
-  for (int j = 0; j < 10; ++j) {
-    paddle_mobile::operators::math::MatMul<int8_t, int32_t>(
-        aa_int8, false, bb_int8, false, static_cast<float>(0.618), &cc_int8,
-        static_cast<float>(0), false, bias_data_col, false);
-  }
-  auto time_start2 = time();
-  for (int j = 0; j < 10; ++j) {
-    paddle_mobile::operators::math::MatMul<int8_t, int32_t>(
-        aa_int8, false, bb_int8, false, static_cast<float>(0.618), &cc_int8,
-        static_cast<float>(0), false, bias_data_col, false);
-  }
-  auto time_end2 = time();
-  std::cout << "int8_t gemm_with_bias(column add) cost :"
-            << time_diff(time_start2, time_end2) / 10 << "ms\n";
+int main() {
+  paddle_mobile::PaddleMobile<paddle_mobile::CPU> paddle_mobile;
+  paddle_mobile.SetThreadNum(1);
 
-  // int8_t with bias, row element wise add
-  // warm-up 10 times
-  for (int j = 0; j < 10; ++j) {
-    paddle_mobile::operators::math::MatMul<int8_t, int32_t>(
-        aa_int8, false, bb_int8, false, static_cast<float>(0.618), &cc_int8,
-        static_cast<float>(0), false, bias_data_row, true);
-  }
-  auto time_start3 = time();
-  for (int j = 0; j < 10; ++j) {
-    paddle_mobile::operators::math::MatMul<int8_t, int32_t>(
-        aa_int8, false, bb_int8, false, static_cast<float>(0.618), &cc_int8,
-        static_cast<float>(0), false, bias_data_row, true);
-  }
-  auto time_end3 = time();
-  std::cout << "int8_t gemm_with_bias(row add) cost :"
-            << time_diff(time_start3, time_end3) / 10 << "ms\n";
+  // float
+  std::cout << "float gemm: 128 - 128 - 128 - false - false " << std::endl;
+  GemmPerf<float, float>(128, 128, 128, false, false);
 
-  // int8_t with bias&relu
-  // warm-up 10 times
-  for (int j = 0; j < 10; ++j) {
-    paddle_mobile::operators::math::MatMul<int8_t, int32_t>(
-        aa_int8, false, bb_int8, false, static_cast<float>(0.618), &cc_int8,
-        static_cast<float>(0), true, bias_data_col, false);
-  }
-  auto time_start4 = time();
-  for (int j = 0; j < 10; ++j) {
-    paddle_mobile::operators::math::MatMul<int8_t, int32_t>(
-        aa_int8, false, bb_int8, false, static_cast<float>(0.618), &cc_int8,
-        static_cast<float>(0), true, bias_data_col, false);
-  }
-  auto time_end4 = time();
-  std::cout << "int8_t gemm_with_bias_relu cost :"
-            << time_diff(time_start4, time_end4) / 10 << "ms\n";
+  std::cout << "float gemm: 256 - 256 - 256 - false - false " << std::endl;
+  GemmPerf<float, float>(256, 256, 256, false, false);
 
-  delete[] bias_data_row;
-  delete[] bias_data_col;
+  std::cout << "float gemm: 512 - 512 - 512 - false - false " << std::endl;
+  GemmPerf<float, float>(512, 512, 512, false, false);
+
+  std::cout << "float gemm: 1024 - 1024 - 1024 - false - false " << std::endl;
+  GemmPerf<float, float>(1024, 1024, 1024, false, false);
 
   return 0;
 }

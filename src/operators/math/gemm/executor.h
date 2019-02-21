@@ -63,12 +63,14 @@ class GemmExecutor : public Executor {
         M_(M),
         N_(N),
         K_(K) {
+    // const unsigned int L1_size = info->L1_cache;
     const unsigned int L1_size = info->L1_cache * 9 / 10;  // use 9/10 L1 cache
     const unsigned int L2_size = info->L2_cache * 9 / 10;  // use 9/10 L2 cache
 
     const int lhs_tile_size = Strategy::out_height() * K * sizeof(Itype);
     const int rhs_tile_size = Strategy::out_width() * K * sizeof(Itype);
     rhs_tile_num_ = CeilDiv(L1_size, rhs_tile_size);
+    // rhs_tile_num_ = L1_size / rhs_tile_size;
     rhs_tile_num_ = (rhs_tile_num_ > 0) ? rhs_tile_num_ : 1;
     rhs_tile_num_ = rhs_tile_num_ * Strategy::out_width();
     lhs_tile_num_ = num_threads_ * Strategy::out_height();
